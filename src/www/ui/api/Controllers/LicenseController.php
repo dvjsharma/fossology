@@ -27,6 +27,7 @@ use Fossology\UI\Api\Exceptions\HttpNotFoundException;
 use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\ApiVersion;
 use Fossology\UI\Api\Models\License;
 use Fossology\UI\Api\Models\LicenseCandidate;
 use Fossology\UI\Api\Models\Obligation;
@@ -151,8 +152,17 @@ class LicenseController extends RestController
    */
   public function getAllLicenses($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $query = $request->getQueryParams();
-    $limit = $request->getHeaderLine(self::LIMIT_PARAM);
+    if ($apiVersion == ApiVersion::V2) {
+      $page = $query[self::PAGE_PARAM] ?? "";
+      $limit = $query[self::LIMIT_PARAM] ?? "";
+      $onlyActive = $query[self::ACTIVE_PARAM] ?? "";
+    } else {
+      $page = $request->getHeaderLine(self::PAGE_PARAM);
+      $limit = $request->getHeaderLine(self::LIMIT_PARAM);
+      $onlyActive = $request->getHeaderLine(self::ACTIVE_PARAM);
+    }
     if (! empty($limit)) {
       $limit = filter_var($limit, FILTER_VALIDATE_INT);
       if ($limit < 1) {
@@ -173,7 +183,6 @@ class LicenseController extends RestController
       $this->restHelper->getGroupId());
     $totalPages = intval(ceil($totalPages / $limit));
 
-    $page = $request->getHeaderLine(self::PAGE_PARAM);
     if (! empty($page) || $page == "0") {
       $page = filter_var($page, FILTER_VALIDATE_INT);
       if ($page <= 0) {
@@ -188,7 +197,6 @@ class LicenseController extends RestController
     } else {
       $page = 1;
     }
-    $onlyActive = $request->getHeaderLine(self::ACTIVE_PARAM);
     if (! empty($onlyActive)) {
       $onlyActive = filter_var($onlyActive, FILTER_VALIDATE_BOOLEAN);
     } else {
@@ -418,10 +426,11 @@ class LicenseController extends RestController
    */
   public function getCandidates($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $this->throwNotAdminException();
     /** @var \Fossology\UI\Page\AdminLicenseCandidate $adminLicenseCandidate */
     $adminLicenseCandidate = $this->restHelper->getPlugin("admin_license_candidate");
-    $licenses = LicenseCandidate::convertDbArray($adminLicenseCandidate->getCandidateArrayData());
+    $licenses = LicenseCandidate::convertDbArray($adminLicenseCandidate->getCandidateArrayData(), $apiVersion);
     return $response->withJson($licenses, 200);
   }
 
@@ -473,7 +482,8 @@ class LicenseController extends RestController
     foreach ($res as $key => $ack) {
       $res[$key]['id'] = intval($ack['la_pk']);
       unset($res[$key]['la_pk']);
-      $res[$key]['is_enabled'] = $ack['is_enabled'] == "t";
+      $res[$key]['isEnabled'] = $ack['is_enabled'] == "t";
+      unset($res[$key]['is_enabled']);
     }
 
     return $response->withJson($res, 200);
@@ -578,8 +588,9 @@ class LicenseController extends RestController
     $res = $this->licenseStdCommentDao->getAllComments();
     foreach ($res as $key => $ack) {
       $res[$key]['id'] = intval($ack['lsc_pk']);
-      $res[$key]['is_enabled'] = $ack['is_enabled'] == "t";
+      $res[$key]['isEnabled'] = $ack['is_enabled'] == "t";
       unset($res[$key]['lsc_pk']);
+      unset($res[$key]['is_enabled']);
     }
     return $response->withJson($res, 200);
   }
