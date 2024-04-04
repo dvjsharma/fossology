@@ -386,12 +386,13 @@ class LicenseController extends RestController
    */
   public function handleImportLicense($request, $response, $args)
   {
+    $apiVersion = ApiVersion::getVersion($request);
     $this->throwNotAdminException();
     $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
     /** @var \Fossology\UI\Page\AdminLicenseFromCSV $adminLicenseFromCsv */
     $adminLicenseFromCsv = $this->restHelper->getPlugin('admin_license_from_csv');
 
-    $uploadedFile = $symReq->files->get($adminLicenseFromCsv->getFileInputName(),
+    $uploadedFile = $symReq->files->get($adminLicenseFromCsv->getFileInputName($apiVersion),
       null);
 
     $requestBody =  $this->getParsedBody($request);
