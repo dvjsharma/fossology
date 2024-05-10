@@ -81,25 +81,25 @@ class Reuser
    * @throws \UnexpectedValueException If reuse upload of reuse group are non
    * integers
    */
-  public function setUsingArray($reuserArray)
+  public function setUsingArray($reuserArray, $version = ApiVersion::V1)
   {
-    if (array_key_exists("reuse_upload", $reuserArray)) {
-      $this->setReuseUpload($reuserArray["reuse_upload"]);
+    if (array_key_exists(($version == ApiVersion::V1? "reuse_upload" : "reuseUpload"), $reuserArray)) {
+      $this->setReuseUpload($reuserArray[$version == ApiVersion::V1? "reuse_upload" : "reuseUpload"]);
     }
-    if (array_key_exists("reuse_group", $reuserArray)) {
-      $this->reuseGroup = $reuserArray["reuse_group"];
+    if (array_key_exists(($version == ApiVersion::V1? "reuse_group" : "reuseGroup"), $reuserArray)) {
+      $this->reuseGroup = $reuserArray[$version == ApiVersion::V1? "reuse_group" : "reuseGroup"];
     }
-    if (array_key_exists("reuse_main", $reuserArray)) {
-      $this->setReuseMain($reuserArray["reuse_main"]);
+    if (array_key_exists(($version == ApiVersion::V1? "reuse_main" : "reuseMain"), $reuserArray)) {
+      $this->setReuseMain($reuserArray[$version == ApiVersion::V1? "reuse_main" : "reuseMain"]);
     }
-    if (array_key_exists("reuse_enhanced", $reuserArray)) {
-      $this->setReuseEnhanced($reuserArray["reuse_enhanced"]);
+    if (array_key_exists(($version == ApiVersion::V1? "reuse_enhanced" : "reuseEnhanced"), $reuserArray)) {
+      $this->setReuseEnhanced($reuserArray[$version == ApiVersion::V1? "reuse_enhanced" : "reuseEnhanced"]);
     }
-    if (array_key_exists("reuse_report", $reuserArray)) {
-      $this->setReuseReport($reuserArray["reuse_report"]);
+    if (array_key_exists(($version == ApiVersion::V1? "reuse_report" : "reuseReport"), $reuserArray)) {
+      $this->setReuseReport($reuserArray[$version == ApiVersion::V1? "reuse_report" : "reuseReport"]);
     }
-    if (array_key_exists("reuse_copyright", $reuserArray)) {
-      $this->setReuseCopyright($reuserArray["reuse_copyright"]);
+    if (array_key_exists(($version == ApiVersion::V1? "reuse_copyright" : "reuseCopyright"), $reuserArray)) {
+      $this->setReuseCopyright($reuserArray[$version == ApiVersion::V1? "reuse_copyright" : "reuseCopyright"]);
     }
     if ($this->reuseUpload === null) {
       throw new \UnexpectedValueException(
@@ -225,15 +225,26 @@ class Reuser
    * Get reuser info as an associative array
    * @return array
    */
-  public function getArray()
+  public function getArray($version = ApiVersion::V1)
   {
-    return [
-      "reuse_upload"    => $this->reuseUpload,
-      "reuse_group"     => $this->reuseGroup,
-      "reuse_main"      => $this->reuseMain,
-      "reuse_enhanced"  => $this->reuseEnhanced,
-      "reuse_report"    => $this->reuseReport,
-      "reuse_copyright" => $this->reuseCopyright
-    ];
+    if ($version == ApiVersion::V2) {
+      return [
+        "reuseUpload"    => $this->reuseUpload,
+        "reuseGroup"     => $this->reuseGroup,
+        "reuseMain"      => $this->reuseMain,
+        "reuseEnhanced"  => $this->reuseEnhanced,
+        "reuseReport"    => $this->reuseReport,
+        "reuseCopyright" => $this->reuseCopyright
+      ];
+    } else {
+      return [
+        "reuse_upload"    => $this->reuseUpload,
+        "reuse_group"     => $this->reuseGroup,
+        "reuse_main"      => $this->reuseMain,
+        "reuse_enhanced"  => $this->reuseEnhanced,
+        "reuse_report"    => $this->reuseReport,
+        "reuse_copyright" => $this->reuseCopyright
+      ];
+    }
   }
 }
