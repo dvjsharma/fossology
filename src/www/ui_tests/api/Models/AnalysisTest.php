@@ -40,6 +40,17 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
   /**
    * @test
    * -# Test for Analysis::setUsingArray() when $version is V2
+   * -# Test for Analysis::setUsingArray() when $version is V1
+   * -# Check if the Analysis object is updated with actual array values
+   */
+  public function testSetUsingArrayV1()
+  {
+    $this->testSetUsingArray(ApiVersion::V1);
+  }
+
+  /**
+   * @test
+   * -# Test for Analysis::setUsingArray() when $version is V2
    * -# Check if the Analysis object is updated with actual array values
    */
   public function testSetUsingArrayV2()
